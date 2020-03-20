@@ -1,0 +1,23 @@
+{
+    "name": "maddokmike/queue-prototype",
+    "type": "library",
+    "authors": [
+        {
+            "name": "mikebamber",
+            "email": "mikebamber@live.com"
+        }
+    ],
+    "require": {
+        "ext-redis": "*",
+        "ext-json": "*",
+        "procureplus/ppcore": "dev-PP-11085"
+    },
+   "repositories":[
+      {"type": "composer", "url": "https://repo.packagist.com/procureplus/"}
+    ],
+  "autoload": {
+        "psr-4" : {
+            "QMan\\" : "src/"
+        }
+    }
+}

@@ -62,22 +62,26 @@ class Job extends BaseEntity{
   public function reachedMaxFails(){
     return ($this->failed_count>= $this->max_fails);
   }
+  
+  public function WorkerId(){
+    return $this->worker_id;
+  }
 
   public static function buildValidationRules(SimpleCollection $rules) {
-      $rules->set('id',new StringRule(true));
-      $rules->set('type',new StringRule(true));
-      $rules->set('instructions',new StringRule(true));
+      $rules->set('id',new StringRule(true,0));
+      $rules->set('type',new StringRule(true,0));
+      $rules->set('instructions',new StringRule(true,0));
       $rules->set('response',new StringRule(false));
       $rules->set('errors',new StringRule(false));
-      $rules->set('worker_id',new StringRule(false));
+      $rules->set('worker_id',new StringRule(false,0));
       $rules->set('created_at',new MySQLDateTimeRule(true));
       $rules->set('started_at',new MySQLDateTimeRule(false));
       $rules->set('completed_at',new MySQLDateTimeRule(false));
       $rules->set('failed_at',new MySQLDateTimeRule(false));
       $rules->set('broke_at',new MySQLDateTimeRule(false));
       $rules->set('deleted_at',new MySQLDateTimeRule(false));
-      $rules->set('max_fails',new IntegerRule(true));
-      $rules->set('fail_count',new IntegerRule(true));
+      $rules->set('max_fails',new IntegerRule(true,1));
+      $rules->set('fail_count',new IntegerRule(true,0));
   }
   
 }

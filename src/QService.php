@@ -1,5 +1,30 @@
 <?php
 
+namespace QMan;
+use PPCore\Adapters\DataSources\DataSourceInterface;
+use QMan\Actors\Worker;
+use QMan\Logs\LogEntry;
+use QMan\Logs\LogRepository;
+use QMan\Resources\QueueResourceInterface;
+
+
+class QService{
+  
+  protected $repository;
+  protected $log;
+  
+  public function __construct(QueueResourceInterface $queueResource,DataSourceInterface $logger){
+    $this->repository = new QueueRepository($queueResource);
+    $this->log = new LogRepository($logger);
+  }
+  public function test(Worker $w){
+    $this->log->save( (new LogEntry())->worker('started',$w) );
+  }
+  private function workerLog(){
+    
+  }
+}
+
 
 
 /*

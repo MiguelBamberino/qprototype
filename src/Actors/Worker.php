@@ -1,17 +1,16 @@
 <?php
 
 namespace QMan\Actors;
-use PPCore\Entities\BaseEntity;
+use PPCore\Requests\AbstractRequestInput;
 use PPCore\Collections\SimpleCollection;
 use PPCore\ValidationRules\StringRule;
-use PPCore\ValidationRules\IntegerRule;
 
-class Worker extends BaseEntity{
+class Worker extends AbstractRequestInput{
   protected $id;
   protected $processing_queue;
   
   public function __construct(string $id){
-    $this->id = $id;
+    parent::__construct(['id'=>$id]);
   }
   
   public function id():string{
@@ -25,7 +24,7 @@ class Worker extends BaseEntity{
   }
   
     public static function buildValidationRules(SimpleCollection $rules) {
-      $rules->set('id',new IntegerRule(false,0));
+      $rules->set('id',new StringRule(false,0));
       $rules->set('processing_queue',new StringRule(false,0));
   }
 }

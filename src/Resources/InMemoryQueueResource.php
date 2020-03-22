@@ -13,6 +13,9 @@ class InMemoryQueueResource implements QueueResourceInterface{
     $this->queues[$name]=[];
     return true;
   }
+  public function haveQ(string $name):bool{
+    return isset($this->queues[$name]);
+  }
   public function pushOnQ(string $queue, string $value):bool{
     $this->queues[$queue][] = $value;
     return true;

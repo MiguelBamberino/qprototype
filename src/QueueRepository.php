@@ -13,7 +13,10 @@ class QueueRepository{
   }
   
   public function createQueue(string $queue){
-     $this->resource->createQ($queue);  
+     return $this->resource->createQ($queue);  
+  }
+  public function haveQueue(string $queue){
+     return $this->resource->haveQ($queue);  
   }
   
   public function pushJob(string $queue, Job $job):bool{

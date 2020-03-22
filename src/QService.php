@@ -2,10 +2,12 @@
 
 namespace QMan;
 use PPCore\Adapters\DataSources\DataSourceInterface;
+use PPCore\Responses\Response;
 use QMan\Actors\Worker;
 use QMan\Logs\LogEntry;
 use QMan\Logs\LogRepository;
 use QMan\Resources\QueueResourceInterface;
+
 
 
 class QService{
@@ -15,14 +17,28 @@ class QService{
   
   public function __construct(QueueResourceInterface $queueResource,DataSourceInterface $logger){
     $this->repository = new QueueRepository($queueResource);
+    $this->repository->createQueue("main");
     $this->log = new LogRepository($logger);
   }
-  public function test(Worker $w){
-    $this->log->save( (new LogEntry())->worker('started',$w) );
-  }
-  private function workerLog(){
+  public function workerStarted(Worker $worker):Response{
     
+    if($worker->validate()){
+      $wq_name = $this->workerQName($worker);
+      // create queue if doesn't already exist
+      if($this->repository->haveQueue($wq_name) == false ){  
+         $this->repository->createQueue($wq_name);
+         $this->log->save( (new LogEntry())->worker('started',$worker) );        
+      }else{
+        $worker->addError("Work {$w->id()} already at work.");
+      }   
+    }
+    
+    return new Response($worker,$worker->getValidationErrors(),$worker->valid(),null);
   }
+  private function workerQName(Worker $w):string{
+    return "wq-".$w->id();
+  }
+  
 }
 
 
@@ -56,6 +72,7 @@ addJob(Job $j)
 
 takeJob(Worker $w)
   jobLog($j,'started')
+  // check own worker Q for left overs?
   // check worker Q empty?
   $j = $q->reserve('main',$w->proccess_q)
   return $j

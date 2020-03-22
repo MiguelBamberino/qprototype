@@ -13,10 +13,11 @@ $ds = new PPCore\Adapters\DataSources\InMemoryDataSource($conf);
 
 $qs = new QMan\QService($qr,$ds);
 $w = new QMan\Actors\Worker("dave");
-$qs->test($w);
-
-$res = $ds->getMany();
-cliTable($res);
+$response = $qs->workerStarted($w);
+var_dump($response->success());
+var_dump($response->errors());
+cliTable($qr->getAllOnQ('main'),"Main Queue");
+cliTable($ds->getMany(),"Queue logs");
 
 exit;
 $job1 = new QMan\Job();
@@ -39,10 +40,16 @@ var_dump($qr->getAllOnQ('main'));
 var_dump($j);
 
 
-function cliTable(array $data){
+function cliTable(array $data,string $title=''){
+  
+  if($title){
+    echo $title,"\n---------------------------\n";
+  }
   
   if(empty($data)){
-    echo "\nNo results\n";return;
+    echo "No results\n";
+    echo "---------------------------\n\n";
+    return;
   }
   
   $headings = array_keys(PPCore\Helpers\ArrayHelper::first($data));
@@ -60,6 +67,8 @@ function cliTable(array $data){
     echo "\n";
     
   }
+  echo str_pad('',count($headings)*18 ,'-')."\n";
+  
   
 }
 function renderCell($text,$width=15, $colChar=" | "){

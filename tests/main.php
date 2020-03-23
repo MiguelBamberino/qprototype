@@ -1,30 +1,37 @@
 <?php
 include __DIR__."/../vendor/autoload.php";
 
+use QMan\Actors\Worker;
+use QMan\Job;
+
+$instructions = json_encode( ['service'=>'PPInvoices\Payments','method'=>'doDatTing',
+                              'request'=>['name'=>'PPInvoices\Requests\UIDInput','params'=>['id'=>4]]
+                             ] );
+
 $qr = new QMan\Resources\InMemoryQueueResource();
 $d=[
   'headings'=>[
     'queue_log'=>['id','worker_id','job_id','queue_name','type','action','job','date']
   ],
+  'primary_key'=>'id',
   'data'=>['queue_log'=>[]],
 ];
 $conf = new PPCore\Collections\Config($d);
 $ds = new PPCore\Adapters\DataSources\InMemoryDataSource($conf);
 
 $qs = new QMan\QService($qr,$ds);
-$w = new QMan\Actors\Worker("dave");
-$response = $qs->workerStarted($w);
-var_dump($response->success());
-var_dump($response->errors());
-cliTable($qr->getAllOnQ('main'),"Main Queue");
+printResponse( $qs->workerStarted(new Worker("dave"))  );
+printResponse( $qs->workerStarted(new Worker("bobby"))  );
+
+printResponse( $qs->addJob( (new Job())->create("service",$instructions)  ) );
+
+cliTable($qs->queryQueue(),"Main Queue",8);
 cliTable($ds->getMany(),"Queue logs");
 
 exit;
 $job1 = new QMan\Job();
 $job2 = new QMan\Job();
-$instructions = json_encode( ['service'=>'PPInvoices\Payments','method'=>'doDatTing',
-                              'request'=>['name'=>'PPInvoices\Requests\UIDInput','params'=>['id'=>4]]
-                             ] );
+
 $job1->create("service",$instructions);
 $job2->create("service",$instructions);
 
@@ -40,8 +47,7 @@ var_dump($qr->getAllOnQ('main'));
 var_dump($j);
 
 
-function cliTable(array $data,string $title=''){
-  
+function cliTable(array $data,string $title='',$width=15){
   if($title){
     echo $title,"\n---------------------------\n";
   }
@@ -51,23 +57,24 @@ function cliTable(array $data,string $title=''){
     echo "---------------------------\n\n";
     return;
   }
+  $blm = $width+3;// bottom line multiplier
   
   $headings = array_keys(PPCore\Helpers\ArrayHelper::first($data));
   foreach($headings as $h){
-    renderCell($h);
+    renderCell($h,$width);
   }
   echo "\n";
-  echo str_pad('',count($headings)*18 ,'-');
+  echo str_pad('',count($headings)*$blm ,'-');
   echo "\n";
   
   foreach($data as $row){
     foreach($row as $cell){
-      renderCell($cell);
+      renderCell($cell,$width);
     }
     echo "\n";
     
   }
-  echo str_pad('',count($headings)*18 ,'-')."\n";
+  echo str_pad('',count($headings)*$blm ,'-')."\n";
   
   
 }
@@ -83,4 +90,9 @@ function renderCell($text,$width=15, $colChar=" | "){
     echo substr($text,0,$width).$colChar;
   }
   
+}
+
+function printResponse(PPCore\Responses\Response $r){
+  var_dump($r->success());
+  var_dump($r->errors());
 }

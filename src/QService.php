@@ -15,6 +15,10 @@ class QService{
   protected $repository;
   protected $log;
   
+  ####################################################################
+  # Worker Calls
+  ####################################################################
+  
   public function __construct(QueueResourceInterface $queueResource,DataSourceInterface $logger){
     $this->repository = new QueueRepository($queueResource);
     $this->repository->createQueue("main");
@@ -29,16 +33,35 @@ class QService{
          $this->repository->createQueue($wq_name);
          $this->log->save( (new LogEntry())->worker('started',$worker) );        
       }else{
-        $worker->addError("Work {$w->id()} already at work.");
+        $worker->addError("Work {$worker->id()} already at work.");
       }   
     }
     
     return new Response($worker,$worker->getValidationErrors(),$worker->valid(),null);
   }
+  public function workerKilled(Worker $worker):Response{
+    
+  }
   private function workerQName(Worker $w):string{
     return "wq-".$w->id();
   }
-  
+  ####################################################################
+  # Jobs Calls
+  ####################################################################
+  public function addJob(Job $job):Response{
+    
+    if($job->valid()){
+      $this->repository->pushJob("main",$job);
+      $this->log->save( (new LogEntry())->job('added',$job,"main") );     
+    }
+    return new Response($job,$job->getValidationErrors(),$job->valid(),null);
+  }
+  ####################################################################
+  # Queue Calls
+  ####################################################################
+  public function queryQueue(){
+    return $this->repository->getAllJobs('main')->toArray();
+  }
 }
 
 

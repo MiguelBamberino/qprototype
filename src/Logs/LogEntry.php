@@ -42,6 +42,7 @@ class LogEntry extends BaseEntity{
     $this->queue_name = $queue_name;
     $this->job = $j->toJson();
     $this->baseCreate($action);
+    return $this;
   }
   
   public static function buildValidationRules(SimpleCollection $rules) {

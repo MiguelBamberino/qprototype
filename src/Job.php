@@ -3,13 +3,13 @@
 namespace QMan;
 
 use PPCore\Helpers\DateHelper;
-use PPCore\Entities\BaseEntity;
+use PPCore\Requests\AbstractRequestInput;
 use PPCore\Collections\SimpleCollection;
 use PPCore\ValidationRules\StringRule;
 use PPCore\ValidationRules\IntegerRule;
 use PPCore\ValidationRules\MySQLDateTimeRule;
 
-class Job extends BaseEntity{
+class Job extends AbstractRequestInput{
   
   protected $id;
   protected $type;
@@ -28,14 +28,14 @@ class Job extends BaseEntity{
   protected $max_fails;
   protected $fail_count;
   
-  public function create(string $type, string $instructions,int $max_fails=1):string{
+  public function create(string $type, string $instructions,int $max_fails=1):Job{
     $this->created_at = DateHelper::now();
     $this->type = $type;
     $this->instructions = $instructions;
     $this->id = uniqid(true).rand(0,9);
     $this->fail_count = 0;
     $this->max_fails = $max_fails;
-    return $this->created_at;
+    return $this;
   }
   
   public function start(string $worker_id):string{
@@ -65,6 +65,9 @@ class Job extends BaseEntity{
   
   public function WorkerId(){
     return $this->worker_id;
+  }
+  public function id(){
+    return $this->id;
   }
 
   public static function buildValidationRules(SimpleCollection $rules) {

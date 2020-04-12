@@ -41,29 +41,35 @@ class Job extends AbstractRequestInput{
   public function start(string $worker_id):string{
     $this->worker_id = $worker_id;
     $this->started_at = DateHelper::now();
+    $this->errors = "";# clear out previous errors
     return $this->started_at;
   }
   
-  public function completed(string $response):string{
+  public function complete(string $response):string{
     $this->response = $response;
     $this->completed_at = DateHelper::now();
     return $this->completed_at;
   }
-  
+  public function completedAt():string{
+    return (string)$this->completed_at;
+  }
+  public function errors():string{
+    return (string)$this->errors;
+  }
   public function fail(array $errors=[]):string{
     $this->errors = json_encode($errors);
     $this->failed_at = DateHelper::now();
-    $this->failed_count++;
+    $this->fail_count++;
     if($this->reachedMaxFails() ){
       $this->broke_at = $this->failed_at;
     }
     return $this->failed_at;
   }
   public function reachedMaxFails(){
-    return ($this->failed_count>= $this->max_fails);
+    return ($this->fail_count>= $this->max_fails);
   }
   
-  public function WorkerId(){
+  public function workerId(){
     return $this->worker_id;
   }
   public function id(){

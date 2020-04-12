@@ -25,9 +25,15 @@ $bobby = new Worker("bobby");
 printResponse( $qs->workerStarted($dave) );
 printResponse( $qs->workerStarted($bobby)  );
 
-printResponse( $qs->addJob( (new Job())->create("service",$instructions)  ) );
+printResponse( $qs->addJob( (new Job())->create("service",$instructions,2)  ) );
+printResponse( $qs->addJob( (new Job())->create("service",$instructions,2)  ) );
+printResponse( $qs->addJob( (new Job())->create("service",$instructions,2)  ) );
 
-printResponse( $qs->takeJob($dave) );
+$res = $qs->takeJob($dave);
+$j = $res->output();
+printResponse( $res );
+$j->fail(["awww naarr"]);
+printResponse( $qs->failedJob( $j ) );
 
 cliTable($qs->queryQueue(),"Main Queue",8);
 cliTable($ds->getMany(),"Queue logs");

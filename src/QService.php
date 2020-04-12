@@ -27,7 +27,7 @@ class QService{
   public function workerStarted(Worker $worker):Response{
     
     if($worker->validate()){
-      $wq_name = $this->workerQName($worker);
+      $wq_name = $this->workerQName($worker->id());
       // create queue if doesn't already exist
       if($this->repository->haveQueue($wq_name) == false ){  
          $this->repository->createQueue($wq_name);
@@ -48,7 +48,7 @@ class QService{
     
     $job = null;
     if($worker->validate()){
-      $wq_name = $this->workerQName($worker);
+      $wq_name = $this->workerQName($worker->id());
       if($this->repository->haveQueue($wq_name) ){ 
         
         $existing = $this->repository->getFirstJob($wq_name);
@@ -61,11 +61,11 @@ class QService{
           }
           
         }else{
-          $worker->addError("Worker {$worker->id()} does not exists.");
+          $worker->addError("Worker {$worker->id()} already has a job. Job ID: {$existing->id()}");
         }
         
       } else{
-        $worker->addError("Worker {$worker->id()} already has a job. Job ID: {$existing->id()}");
+        $worker->addError("Worker {$worker->id()} does not exists.");
       }
       
                                     
@@ -73,19 +73,59 @@ class QService{
     return new Response($worker,$worker->getValidationErrors(),$worker->valid(),$job);
   }
   
-  private function workerQName(Worker $w):string{
-    return "wq-".$w->id();
+  private function workerQName(string $worker_id):string{
+    return "wq-".$worker_id;
   }
   ####################################################################
   # Jobs Calls
   ####################################################################
   public function addJob(Job $job):Response{
     
-    if($job->valid()){
+    if($job->validate()){
       $this->repository->pushJob("main",$job);
       $this->log->save( (new LogEntry())->job('added',$job,"main") );     
     }
     return new Response($job,$job->getValidationErrors(),$job->valid(),null);
+  }
+  
+  public function completeJob(Job $job):Response{
+    
+    if($job->validate()){
+      
+      if($job->completedAt()){
+        $wq_name = $this->workerQName($job->workerId());
+        $this->repository->popJob($wq_name);
+        $this->log->save( (new LogEntry())->job('completed',$job,"main") );    
+      }else{
+        $job->addError("Job ID: {$job->id()} must be marked complete with Job::complete() before passing into service::completeJob()");
+      }
+      
+    } 
+    return new Response($job,$job->getValidationErrors(),$job->valid(),null);
+  }
+  
+  public function failedJob(Job $job):Response{
+      
+    if($job->validate()){
+      
+      if($job->errors()){
+        
+        $wq_name = $this->workerQName($job->workerId());
+        
+        if($job->reachedMaxFails()){
+          $this->repository->popJob($wq_name);
+          $this->log->save( (new LogEntry())->job('broken',$job,"main") );            
+        }else{
+          $this->repository->popAndPushJob($wq_name,"main");
+          $this->log->save( (new LogEntry())->job('failed',$job,"main") );
+        }
+        
+      }else{
+        $job->addError("Job ID: {$job->id()} has no errors. Call Job::fail() before calling service::failedJob()");
+      }
+    }
+    return new Response($job,$job->getValidationErrors(),$job->valid(),null);
+    
   }
   ####################################################################
   # Queue Calls

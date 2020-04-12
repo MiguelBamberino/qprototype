@@ -20,10 +20,14 @@ $conf = new PPCore\Collections\Config($d);
 $ds = new PPCore\Adapters\DataSources\InMemoryDataSource($conf);
 
 $qs = new QMan\QService($qr,$ds);
-printResponse( $qs->workerStarted(new Worker("dave"))  );
-printResponse( $qs->workerStarted(new Worker("bobby"))  );
+$dave = new Worker("dave");
+$bobby = new Worker("bobby");
+printResponse( $qs->workerStarted($dave) );
+printResponse( $qs->workerStarted($bobby)  );
 
 printResponse( $qs->addJob( (new Job())->create("service",$instructions)  ) );
+
+printResponse( $qs->takeJob($dave) );
 
 cliTable($qs->queryQueue(),"Main Queue",8);
 cliTable($ds->getMany(),"Queue logs");

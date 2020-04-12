@@ -36,7 +36,7 @@ class LogEntry extends BaseEntity{
     return $this;
   }
   public function job(string $action,Job $j, string $queue_name):LogEntry{
-    $this->type = 'worker';
+    $this->type = 'job';
     $this->worker_id = $j->workerId();
     $this->job_id = $j->id();
     $this->queue_name = $queue_name;

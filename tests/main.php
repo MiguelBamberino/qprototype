@@ -33,7 +33,8 @@ $res = $qs->takeJob($dave);
 $j = $res->output();
 printResponse( $res );
 $j->fail(["awww naarr"]);
-printResponse( $qs->failedJob( $j ) );
+printResponse( $qs->workerKilled( $dave ) );
+# printResponse( $qs->failedJob( $j ) );
 
 cliTable($qs->queryQueue(),"Main Queue",8);
 cliTable($ds->getMany(),"Queue logs");

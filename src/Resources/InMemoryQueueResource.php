@@ -13,6 +13,14 @@ class InMemoryQueueResource implements QueueResourceInterface{
     $this->queues[$name]=[];
     return true;
   }
+  public function deleteQ(string $name):bool{
+    if(isset($this->queues[$name])){
+      unset($this->queues[$name]);
+      return true;
+    }
+    return false;
+  }
+  
   public function haveQ(string $name):bool{
     return isset($this->queues[$name]);
   }

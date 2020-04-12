@@ -12,10 +12,13 @@ class QueueRepository{
     
   }
   
-  public function createQueue(string $queue){
+  public function createQueue(string $queue):bool{
      return $this->resource->createQ($queue);  
   }
-  public function haveQueue(string $queue){
+  public function deleteQueue(string $queue):bool{
+    return $this->resource->deleteQ($queue);
+  }
+  public function haveQueue(string $queue):bool{
      return $this->resource->haveQ($queue);  
   }
   

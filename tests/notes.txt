@@ -10,7 +10,12 @@ takeJob(Worker $w)
   // check worker Q empty?
   $j = $q->reserve('main',$w->proccess_q)
   return $j
-
+  
+workerKilled(Worker $w)
+  workLog($w,'killed')
+  reQueueStaleJob($w)
+  deleteProcessingQueue($w)
+  
 --------------------------------------------------
 addJob(Job $j)
   jobLog($j,'added')
@@ -19,6 +24,15 @@ addJob(Job $j)
 completeJob(Job $j)
     jobLog($j,'completed')
     $q->pop($j->worker_id)
+    
+failedJob(Job $j)
+  if( $j->tooMAnyFails() )
+    jobLog($j,'broken')
+    $q->pop($j->worker_id)
+  else
+    jobLog($j,'failed')
+    $j->fails++
+    reQueueStaleJob($j->worker)
 
 --------------------------------------------------
 private workerLog(Worker $w, string $event)
@@ -42,10 +56,6 @@ private jobLog(Worker $w, Job $j, string $event)
 TODO
 #################################################
 
-workerKilled(Worker $w)
-  workLog($w,'killed')
-  reQueueStaleJob($w)
-  deleteProcessingQueue($w)
   
 checkStaleJobs()
   $js = getJobsInProccess()
@@ -61,14 +71,7 @@ heartBeat(Worker $w)
 
 
 
-failedJob(Job $j)
-  if( $j->tooMAnyFails() )
-    jobLog($j,'broken')
-    $q->pop($j->worker_id)
-  else
-    jobLog($j,'failed')
-    $j->fails++
-    reQueueStaleJob($j->worker)
+
   
 
 --------------------------------------------------

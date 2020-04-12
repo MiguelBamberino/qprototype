@@ -42,6 +42,21 @@ class QService{
   
   public function workerKilled(Worker $worker):Response{
     
+    if($worker->validate()){
+        $wq_name = $this->workerQName($worker->id());
+        if($this->repository->haveQueue($wq_name)){
+          // requeue any job then delete queue
+          $job = $this->repository->popAndPushJob($wq_name,"main");
+          if($job instanceof Job){
+            $this->log->save( (new LogEntry())->job('readded',$job,"main") );             
+          }
+          $this->repository->deleteQueue($wq_name);
+        }
+        
+        $this->log->save( (new LogEntry())->worker('killed',$worker) );        
+      
+    }
+    return new Response($worker,$worker->getValidationErrors(),$worker->valid(),null);
   }
   
   public function takeJob(Worker $worker):Response{

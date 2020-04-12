@@ -3,6 +3,7 @@ namespace QMan\Resources;
 interface QueueResourceInterface{
   
   public function createQ(string $name):bool;
+  public function deleteQ(string $name):bool;
   public function haveQ(string $name):bool;
   public function pushOnQ(string $queue, string $value):bool;
   public function popOffQ(string $queue):string;

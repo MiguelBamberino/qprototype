@@ -56,7 +56,7 @@ private jobLog(Worker $w, Job $j, string $event)
 TODO
 #################################################
 
-  
+foreman :  
 checkStaleJobs()
   $js = getJobsInProccess()
   foreach($js as $j)
@@ -84,4 +84,13 @@ log:
   - sub_type (started,died,stat,killed,added,readded,completed,failed,broken,deleted)
   - object
   - date
+  
+  
+  Foreman :
+  - check for dead workers (check worker heart beats)
+  - check for stale jobs
+  - maintain min and max works
+  - check in with dev/ prove foreman is still alive
+  - work heart beats stored in log for now, could create too much data
+  store workers in db vs queue vs ?
   

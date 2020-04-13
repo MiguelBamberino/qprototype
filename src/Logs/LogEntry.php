@@ -20,7 +20,7 @@ class LogEntry extends BaseEntity{
   protected $job;
   protected $date;
   
-  private static $allowed_types =['started','died','stat','killed','added','readded','completed','failed','broken','deleted'];
+  private static $allowed_types =['started','died','heartbeat','stat','killed','added','readded','completed','failed','broken','deleted'];
   
   public function setId($id){
     $this->id = $id;

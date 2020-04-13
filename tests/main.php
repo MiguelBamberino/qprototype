@@ -29,6 +29,8 @@ printResponse( $qs->addJob( (new Job())->create("service",$instructions,2)  ) );
 printResponse( $qs->addJob( (new Job())->create("service",$instructions,2)  ) );
 printResponse( $qs->addJob( (new Job())->create("service",$instructions,2)  ) );
 
+printResponse( $qs->workerHeartBeat($bobby) );
+printResponse( $qs->workerHeartBeat($dave) );
 $res = $qs->takeJob($dave);
 $j = $res->output();
 printResponse( $res );

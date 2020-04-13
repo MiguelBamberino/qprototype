@@ -59,6 +59,13 @@ class QService{
     return new Response($worker,$worker->getValidationErrors(),$worker->valid(),null);
   }
   
+  public function workerHeartBeat(Worker $worker):Response{
+    if($worker->validate()){
+        $this->log->save( (new LogEntry())->worker('heartbeat',$worker) );        
+    }
+    return new Response($worker,$worker->getValidationErrors(),$worker->valid(),null);
+  }
+  
   public function takeJob(Worker $worker):Response{
     
     $job = null;
